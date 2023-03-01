@@ -1,4 +1,4 @@
-package com.nelsonalmendra.movies_app
+package com.nelsonalmendra.movies
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

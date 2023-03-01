@@ -1,4 +1,4 @@
-package com.nelsonalmendra.movies_app.ui.theme
+package com.nelsonalmendra.movies.ui.theme
 
 import android.app.Activity
 import android.os.Build

@@ -1,4 +1,4 @@
-package com.nelsonalmendra.movies_app
+package com.nelsonalmendra.movies
 
 import org.junit.Test
 
