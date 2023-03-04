@@ -1,6 +1,7 @@
 package com.nelsonalmendra.movies.api
 
 import com.nelsonalmendra.movies.model.Movie
+import com.nelsonalmendra.movies.model.Search
 import com.nelsonalmendra.movies_app.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -12,9 +13,15 @@ import retrofit2.http.Query
 interface MoviesService {
 
     @GET("/")
-    suspend fun getMovies(
+    suspend fun searchMovies(
         @Query("apikey") apikey: String = BuildConfig.OMDB_API_KEY,
-        @Query("i") i: String = "tt0139654"
+        @Query("s") s: String
+    ): Search
+
+    @GET("/")
+    suspend fun getMovie(
+        @Query("apikey") apikey: String = BuildConfig.OMDB_API_KEY,
+        @Query("i") i: String
     ): Movie
 
     companion object {

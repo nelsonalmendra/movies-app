@@ -1,12 +1,11 @@
 package com.nelsonalmendra.movies.data
 
-import com.nelsonalmendra.movies.api.MoviesService
-import kotlinx.coroutines.flow.flow
-import javax.inject.Inject
+import com.nelsonalmendra.movies.model.Movie
+import com.nelsonalmendra.movies.model.Search
+import kotlinx.coroutines.flow.Flow
 
-class MoviesRepository @Inject constructor(private val service: MoviesService) {
+interface MoviesRepository {
 
-    fun search(text: String) = flow {
-        emit(service.getMovies(i = text))
-    }
+    fun searchByText(text: String): Flow<Search>
+    fun searchById(id: String): Flow<Movie>
 }
