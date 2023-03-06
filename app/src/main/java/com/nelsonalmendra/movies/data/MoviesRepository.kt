@@ -6,6 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface MoviesRepository {
 
-    fun searchByText(text: String): Flow<Search>
+    fun searchByText(text: String): Flow<List<Movie>>
     fun searchById(id: String): Flow<Movie>
 }
