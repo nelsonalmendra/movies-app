@@ -4,25 +4,26 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import com.nelsonalmendra.movies.model.Movie
 import com.nelsonalmendra.movies.ui.theme.MoviesappTheme
 import com.nelsonalmendra.movies.viewmodels.MoviesViewModel
+import com.nelsonalmendra.movies_app.R
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -35,8 +36,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val navController = rememberNavController()
-                    MoviesNavHost(navController)
+//                    val navController = rememberNavController()
+//                    MoviesNavHost(navController)
+                    SearchScreen()
                 }
             }
         }
@@ -47,70 +49,82 @@ class MainActivity : ComponentActivity() {
 fun MoviesNavHost(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = "home"
+        startDestination = "search"
     ) {
-        composable("home") {
-            HomeScreen {
-                navController.navigate("search")
-            }
-        }
         composable("search") { SearchScreen() }
     }
 }
 
 @Composable
-fun HomeScreen(onButtonClick: () -> Unit = {}) {
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)
-    ) {
-        OutlinedButton (
-            onClick = onButtonClick,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(4.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                modifier = Modifier.defaultMinSize(),
-                contentDescription = "search")
-
-            Text(
-                text = "Search for a movie..."
-            )
-        }
-    }
-}
-
-@Composable
-fun SearchScreen() {
+fun SearchScreen(moviesViewModel: MoviesViewModel = hiltViewModel()) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()) {
-        val searchText = remember { mutableStateOf(TextFieldValue()) }
-        TextField(value = searchText.value, onValueChange = {
-            searchText.value = it
-        })
+
+        SearchBar()
+
+        val initialList = listOf(
+            Movie("Training Day"),
+            Movie("8 Mile"),
+            Movie("Inception"),
+            Movie("Dark Knight")
+
+        )
+        val movies: List<Movie> by moviesViewModel.movies.collectAsState(initial = initialList)
+        DisplayList(movies = initialList)
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
 @Composable
-fun Greeting(
-    name: String,
-    viewModel: MoviesViewModel = hiltViewModel()) {
-//    viewModel.test()
-    Text(text = "Hello $name!")
+private fun SearchBar(
+    modifier: Modifier = Modifier
+) {
+    var value by remember { mutableStateOf("") }
+    TextField(
+        value = value,
+        onValueChange = { value  = it },
+        leadingIcon = {
+            Icon(
+              imageVector = Icons.Default.Search,
+              contentDescription = null
+          )
+        },
+        colors = TextFieldDefaults.textFieldColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        placeholder = {
+            Text(stringResource(R.string.placeholder_search))
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+    )
 }
 
-@Preview(showBackground = true)
+//@Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
-    MoviesappTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-//            HomeScreen()
-            SearchScreen()
+fun DisplayList(
+    modifier: Modifier = Modifier,
+    movies: List<Movie>) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.height(120.dp)
+    ) {
+        items(movies) {
+            DisplayItem(it)
         }
     }
+}
+
+@Composable
+fun DisplayItem(movie: Movie) {
+    Text(
+        text = movie.title,
+        modifier = Modifier.height(56.dp)
+    )
 }
