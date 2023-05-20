@@ -1,7 +1,7 @@
 package com.nelsonalmendra.movies.api
 
 import com.nelsonalmendra.movies.model.Movie
-import com.nelsonalmendra.movies.model.Search
+import com.nelsonalmendra.movies.model.SearchResult
 import com.nelsonalmendra.movies_app.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -16,7 +16,7 @@ interface MoviesService {
     suspend fun searchMovies(
         @Query("apikey") apikey: String = BuildConfig.OMDB_API_KEY,
         @Query("s") s: String
-    ): Search
+    ): SearchResult
 
     @GET("/")
     suspend fun getMovie(

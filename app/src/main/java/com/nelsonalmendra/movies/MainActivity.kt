@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,6 +22,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nelsonalmendra.movies.model.Movie
+import com.nelsonalmendra.movies.ui.state.SearchUiState
 import com.nelsonalmendra.movies.ui.theme.MoviesappTheme
 import com.nelsonalmendra.movies.viewmodels.MoviesViewModel
 import com.nelsonalmendra.movies_app.R
@@ -63,15 +65,11 @@ fun SearchScreen(moviesViewModel: MoviesViewModel = hiltViewModel()) {
 
         SearchBar()
 
-        val initialList = listOf(
-            Movie("Training Day"),
-            Movie("8 Mile"),
-            Movie("Inception"),
-            Movie("Dark Knight")
-
-        )
-        val movies: List<Movie> by moviesViewModel.movies.collectAsState(initial = initialList)
-        DisplayList(movies = initialList)
+        val searchUiState by moviesViewModel.searchUiState.collectAsState()
+        when (searchUiState) {
+            is SearchUiState.Success -> DisplayList(movies = (searchUiState as SearchUiState.Success).results)
+            else -> {}
+        }
     }
 }
 
@@ -79,12 +77,16 @@ fun SearchScreen(moviesViewModel: MoviesViewModel = hiltViewModel()) {
 @Preview
 @Composable
 private fun SearchBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    moviesViewModel: MoviesViewModel = hiltViewModel()
 ) {
-    var value by remember { mutableStateOf("") }
+    var value by rememberSaveable { mutableStateOf("") }
     TextField(
         value = value,
-        onValueChange = { value  = it },
+        onValueChange = {
+            value = it
+            moviesViewModel.search(it)
+        },
         leadingIcon = {
             Icon(
               imageVector = Icons.Default.Search,
@@ -113,7 +115,7 @@ fun DisplayList(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier.height(120.dp)
+//        modifier = modifier.height(120.dp)
     ) {
         items(movies) {
             DisplayItem(it)
