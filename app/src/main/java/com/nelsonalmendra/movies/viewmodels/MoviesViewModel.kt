@@ -9,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,13 +23,18 @@ class MoviesViewModel @Inject constructor(
 
     fun search(text: String) {
         if (text.length < 3) {
+            _searchUiState.value = SearchUiState.Error("No results (min 3 characters)")
             return
         }
 
         _searchUiState.value = SearchUiState.Loading
         viewModelScope.launch {
-            searchByTextUseCase(text).collect {
-                _searchUiState.value = SearchUiState.Success(it)
+            searchByTextUseCase(text).collect { movies ->
+                if (movies.isEmpty()) {
+                    _searchUiState.value = SearchUiState.Error("No results")
+                } else {
+                    _searchUiState.value = SearchUiState.Success(movies)
+                }
             }
         }
     }

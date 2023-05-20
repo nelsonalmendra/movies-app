@@ -4,5 +4,5 @@ import com.google.gson.annotations.SerializedName
 
 data class SearchResult(
     @SerializedName("Search")
-    val movies: List<Movie>
+    val movies: List<Movie> = emptyList()
 )

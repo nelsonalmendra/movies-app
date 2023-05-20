@@ -3,6 +3,7 @@ package com.nelsonalmendra.movies
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -14,13 +15,17 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import coil.compose.AsyncImage
 import com.nelsonalmendra.movies.model.Movie
 import com.nelsonalmendra.movies.ui.state.SearchUiState
 import com.nelsonalmendra.movies.ui.theme.MoviesappTheme
@@ -68,13 +73,29 @@ fun SearchScreen(moviesViewModel: MoviesViewModel = hiltViewModel()) {
         val searchUiState by moviesViewModel.searchUiState.collectAsState()
         when (searchUiState) {
             is SearchUiState.Success -> DisplayList(movies = (searchUiState as SearchUiState.Success).results)
+            is SearchUiState.Error -> DisplayMessage((searchUiState as SearchUiState.Error).message)
             else -> {}
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview
+@Composable
+fun DisplayMessage(message: String = "No Results") {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = message
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+//@Preview
 @Composable
 private fun SearchBar(
     modifier: Modifier = Modifier,
@@ -115,7 +136,6 @@ fun DisplayList(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
-//        modifier = modifier.height(120.dp)
     ) {
         items(movies) {
             DisplayItem(it)
@@ -125,8 +145,25 @@ fun DisplayList(
 
 @Composable
 fun DisplayItem(movie: Movie) {
-    Text(
-        text = movie.title,
-        modifier = Modifier.height(56.dp)
-    )
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        AsyncImage(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 300.dp),
+            model = movie.poster,
+            contentDescription = "poster"
+        )
+        Text(
+            text = movie.year,
+            modifier = Modifier.fillMaxWidth(),
+            fontSize = 16.sp
+        )
+        Text(
+            text = movie.title,
+            modifier = Modifier.fillMaxWidth(),
+            fontSize = 18.sp
+        )
+    }
 }
