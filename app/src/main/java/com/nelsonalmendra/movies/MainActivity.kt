@@ -3,7 +3,6 @@ package com.nelsonalmendra.movies
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -15,18 +14,20 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import coil.compose.AsyncImage
 import com.nelsonalmendra.movies.model.Movie
+import com.nelsonalmendra.movies.ui.detail.MovieDetailScreen
 import com.nelsonalmendra.movies.ui.state.SearchUiState
 import com.nelsonalmendra.movies.ui.theme.MoviesappTheme
 import com.nelsonalmendra.movies.viewmodels.MoviesViewModel
@@ -43,9 +44,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-//                    val navController = rememberNavController()
-//                    MoviesNavHost(navController)
-                    SearchScreen()
+                    val navController = rememberNavController()
+                    MoviesNavHost(navController)
+//                    SearchScreen()
                 }
             }
         }
@@ -58,12 +59,25 @@ fun MoviesNavHost(navController: NavHostController) {
         navController = navController,
         startDestination = "search"
     ) {
-        composable("search") { SearchScreen() }
+        composable("search") {
+            SearchScreen {
+                navController.navigate("movieDetail/${it.imdbID}")
+            }
+        }
+        composable("movieDetail/{imdbID}",
+            arguments = listOf(navArgument("imdbID") {
+                type = NavType.StringType
+            })) {
+            MovieDetailScreen()
+        }
     }
 }
 
 @Composable
-fun SearchScreen(moviesViewModel: MoviesViewModel = hiltViewModel()) {
+fun SearchScreen(
+    moviesViewModel: MoviesViewModel = hiltViewModel(),
+    onMovieClick: (Movie) -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()) {
@@ -72,7 +86,7 @@ fun SearchScreen(moviesViewModel: MoviesViewModel = hiltViewModel()) {
 
         val searchUiState by moviesViewModel.searchUiState.collectAsState()
         when (val state = searchUiState) {
-            is SearchUiState.Success -> DisplayList(movies = state.results)
+            is SearchUiState.Success -> DisplayList(movies = state.results) { onMovieClick(it) }
             is SearchUiState.Error -> DisplayMessage(state.message)
             else -> DisplayLoading()
         }
@@ -137,40 +151,50 @@ fun DisplayMessage(message: String = "No Results") {
 @Composable
 fun DisplayList(
     modifier: Modifier = Modifier,
-    movies: List<Movie>) {
+    movies: List<Movie>,
+    onMovieClick: (Movie) -> Unit
+) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(movies) {
-            DisplayItem(it)
+        items(movies) {movie ->
+            DisplayItem(movie, onMovieClick)
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DisplayItem(movie: Movie) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
+fun DisplayItem(
+    movie: Movie,
+    onClick: (Movie) -> Unit
+) {
+    Card(
+        onClick = { onClick(movie) }
     ) {
-        AsyncImage(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 300.dp),
-            model = movie.poster,
-            contentDescription = "poster"
-        )
-        Text(
-            text = movie.year,
-            modifier = Modifier.fillMaxWidth(),
-            fontSize = 16.sp
-        )
-        Text(
-            text = movie.title,
-            modifier = Modifier.fillMaxWidth(),
-            fontSize = 18.sp
-        )
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 300.dp),
+                model = movie.poster,
+                contentDescription = "poster"
+            )
+            Text(
+                text = movie.year,
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 16.sp
+            )
+            Text(
+                text = movie.title,
+                modifier = Modifier.fillMaxWidth(),
+                fontSize = 18.sp
+            )
+        }
     }
 }
