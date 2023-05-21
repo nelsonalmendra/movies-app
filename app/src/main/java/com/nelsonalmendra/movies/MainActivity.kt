@@ -71,12 +71,19 @@ fun SearchScreen(moviesViewModel: MoviesViewModel = hiltViewModel()) {
         SearchBar()
 
         val searchUiState by moviesViewModel.searchUiState.collectAsState()
-        when (searchUiState) {
-            is SearchUiState.Success -> DisplayList(movies = (searchUiState as SearchUiState.Success).results)
-            is SearchUiState.Error -> DisplayMessage((searchUiState as SearchUiState.Error).message)
-            else -> {}
+        when (val state = searchUiState) {
+            is SearchUiState.Success -> DisplayList(movies = state.results)
+            is SearchUiState.Error -> DisplayMessage(state.message)
+            else -> DisplayLoading()
         }
     }
+}
+
+@Composable
+fun DisplayLoading() {
+    CircularProgressIndicator(
+        modifier = Modifier.padding(8.dp)
+    )
 }
 
 @Preview
