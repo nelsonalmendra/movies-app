@@ -79,28 +79,6 @@ fun SearchScreen(moviesViewModel: MoviesViewModel = hiltViewModel()) {
     }
 }
 
-@Composable
-fun DisplayLoading() {
-    CircularProgressIndicator(
-        modifier = Modifier.padding(8.dp)
-    )
-}
-
-@Preview
-@Composable
-fun DisplayMessage(message: String = "No Results") {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = message
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 //@Preview
 @Composable
@@ -131,6 +109,28 @@ private fun SearchBar(
             .fillMaxWidth()
             .heightIn(min = 56.dp)
     )
+}
+
+@Composable
+fun DisplayLoading() {
+    CircularProgressIndicator(
+        modifier = Modifier.padding(8.dp)
+    )
+}
+
+@Preview
+@Composable
+fun DisplayMessage(message: String = "No Results") {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = message
+        )
+    }
 }
 
 //@Preview(showBackground = true)
